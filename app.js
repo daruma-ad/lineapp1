@@ -12,7 +12,7 @@
     // 設定
     // ============================================
     const CONFIG = {
-        LIFF_ID: 'YOUR_LIFF_ID',
+        LIFF_ID: '2009548533-soJTY61B',
         API_ENDPOINT: '/api/lottery',
         API_TIMEOUT_MS: 5000,
         USE_MOCK: true,
