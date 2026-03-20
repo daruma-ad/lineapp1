@@ -23,7 +23,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen overflow-hidden text-gray-800">
+<body class="flex flex-col items-center justify-start min-h-screen text-gray-800">
 
     <!-- ===== ヘッダー: LIFF ユーザー情報 ===== -->
     <div id="liff-header" class="fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-2 z-50 bg-[#fdfaf6]/90 backdrop-blur-sm">
@@ -39,11 +39,11 @@
     </div>
 
     <!-- ===== タイトル ===== -->
-    <div class="text-center mb-6 z-10 mt-14">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-[#b71c1c] mb-3 tracking-widest" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 4px 4px 0 #ffca28;">
+    <div class="text-center mb-6 z-10 mt-12 px-2">
+        <h1 class="text-3xl md:text-6xl font-extrabold text-[#b71c1c] mb-2 tracking-widest" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 4px 4px 0 #ffca28;">
             だるまや大抽選会
         </h1>
-        <p class="text-lg md:text-xl font-bold bg-[#fdfaf6] inline-block px-4 py-1 rounded-full border-2 border-[#b71c1c] text-[#b71c1c]">
+        <p class="text-base md:text-xl font-bold bg-[#fdfaf6] inline-block px-4 py-1 rounded-full border-2 border-[#b71c1c] text-[#b71c1c]">
             ハンドルを回して運試し！
         </p>
     </div>
@@ -52,15 +52,15 @@
     <div class="relative w-full max-w-3xl aspect-[4/3] md:aspect-video bg-[#fffdfa] rounded-xl japanese-border select-none overflow-hidden mt-2">
         <!-- 結果ポップアップ -->
         <div id="result-popup" class="absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-50 z-30 bg-black/60 backdrop-blur-sm">
-            <div class="bg-[#fffdfa] p-8 md:p-12 rounded-lg shadow-2xl flex flex-col items-center justify-center japanese-border max-w-[90%] md:max-w-md relative overflow-hidden">
+            <div class="bg-[#fffdfa] p-5 md:p-12 rounded-lg shadow-2xl flex flex-col items-center justify-center japanese-border max-w-[92%] md:max-w-md relative overflow-hidden">
                 <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#b71c1c 2px, transparent 2px); background-size: 20px 20px;"></div>
-                <h2 id="result-text" class="text-5xl md:text-7xl font-extrabold mb-6 tracking-widest z-10" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;">当たり！</h2>
-                <div class="relative w-56 h-56 md:w-72 md:h-72 rounded-sm overflow-hidden shadow-inner bg-gray-100 flex items-center justify-center border-4 border-[#e0e0e0] z-10">
+                <h2 id="result-text" class="text-3xl md:text-7xl font-extrabold mb-4 tracking-widest z-10" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;">当たり！</h2>
+                <div class="relative w-40 h-40 md:w-72 md:h-72 rounded-sm overflow-hidden shadow-inner bg-gray-100 flex items-center justify-center border-4 border-[#e0e0e0] z-10">
                     <img id="result-image" src="" alt="景品画像" class="w-full h-full object-cover hidden">
-                    <div id="result-no-image" class="text-gray-400 font-bold hidden">画像なし</div>
+                    <div id="result-no-image" class="text-gray-400 font-bold hidden text-sm">画像なし</div>
                 </div>
-                <div class="mt-6 bg-[#b71c1c] text-white px-6 py-2 rounded-sm shadow-md z-10 border border-[#ffca28]">
-                    <p id="result-prize-name" class="text-2xl md:text-3xl font-bold text-center tracking-wide">...</p>
+                <div class="mt-4 bg-[#b71c1c] text-white px-5 py-2 rounded-sm shadow-md z-10 border border-[#ffca28]">
+                    <p id="result-prize-name" class="text-xl md:text-3xl font-bold text-center tracking-wide">...</p>
                 </div>
                 <!-- LINEシェアボタン -->
                 <button id="share-btn" class="mt-4 px-6 py-2 bg-[#06C755] text-white font-bold rounded-full shadow-md hover:bg-[#05b04b] transition-colors z-10 tracking-wide text-lg flex items-center gap-2">
@@ -149,9 +149,9 @@
     </div>
 
     <!-- ===== ボタン ===== -->
-    <button id="spin-btn" class="mt-8 relative group z-10">
+    <button id="spin-btn" class="mt-6 mb-4 relative group z-10">
         <div class="absolute inset-0 bg-[#ffca28] rounded-lg translate-y-2 group-hover:translate-y-1 group-active:translate-y-0 transition-transform"></div>
-        <div class="relative bg-[#b71c1c] text-white px-10 py-4 text-2xl md:text-3xl rounded-lg font-bold border-2 border-[#ffca28] tracking-widest flex items-center justify-center group-hover:-translate-y-1 group-active:translate-y-0 transition-transform">
+        <div class="relative bg-[#b71c1c] text-white px-8 py-3 text-xl md:text-3xl rounded-lg font-bold border-2 border-[#ffca28] tracking-widest flex items-center justify-center group-hover:-translate-y-1 group-active:translate-y-0 transition-transform">
             <span style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">自動で回す</span>
         </div>
     </button>
