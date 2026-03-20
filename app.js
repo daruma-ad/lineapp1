@@ -13,9 +13,9 @@
     // ============================================
     const CONFIG = {
         LIFF_ID: '2009548533-soJTY61B',
-        API_ENDPOINT: '/api/lottery',
-        API_TIMEOUT_MS: 5000,
-        USE_MOCK: true,
+        API_ENDPOINT: 'https://lottery-vg3nlzkutq-uc.a.run.app',
+        API_TIMEOUT_MS: 10000, // 通信状況を考慮して少し長めに設定
+        USE_MOCK: false,
         MAX_ATTEMPTS: 3,
     };
 

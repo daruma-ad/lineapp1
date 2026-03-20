@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザー情報の読み取りのみ許可（デバッグ用）
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // 書き込みは Cloud Functions からのみ行う
+    }
+    
+    // 履歴は読み取り専用
+    match /history/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+  }
+}
