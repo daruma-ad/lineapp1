@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>だるまや大抽選会</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&display=swap');
+        body {
+            touch-action: none;
+            font-family: 'Shippori Mincho', serif;
+            background-color: #fdfaf6;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' fill='%23fdfaf6'/%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        .hit-area:hover { cursor: grab; }
+        .hit-area:active { cursor: grabbing; }
+        .japanese-border {
+            border: 8px solid #b71c1c;
+            box-shadow: 0 0 0 4px #ffca28, 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen overflow-hidden text-gray-800">
+
+    <!-- ===== ヘッダー: LIFF ユーザー情報 ===== -->
+    <div id="liff-header" class="fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-2 z-50 bg-[#fdfaf6]/90 backdrop-blur-sm">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-[#ffca28] bg-gray-100">
+                <img id="user-avatar" class="w-full h-full object-cover" src="" alt="" />
+            </div>
+            <span id="user-name" class="text-sm font-bold text-[#5D4037]">ログイン中...</span>
+        </div>
+        <div id="remaining-badge" class="bg-[#b71c1c] text-white px-3 py-1 rounded-full text-xs font-bold shadow">
+            残り <span id="remaining-count" class="text-[#ffca28] text-base font-black">-</span> 回
+        </div>
+    </div>
+
+    <!-- ===== タイトル ===== -->
+    <div class="text-center mb-6 z-10 mt-14">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-[#b71c1c] mb-3 tracking-widest" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 4px 4px 0 #ffca28;">
+            だるまや大抽選会
+        </h1>
+        <p class="text-lg md:text-xl font-bold bg-[#fdfaf6] inline-block px-4 py-1 rounded-full border-2 border-[#b71c1c] text-[#b71c1c]">
+            ハンドルを回して運試し！
+        </p>
+    </div>
+
+    <!-- ===== メインエリア（ガラポン） ===== -->
+    <div class="relative w-full max-w-3xl aspect-[4/3] md:aspect-video bg-[#fffdfa] rounded-xl japanese-border select-none overflow-hidden mt-2">
+        <!-- 結果ポップアップ -->
+        <div id="result-popup" class="absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-50 z-30 bg-black/60 backdrop-blur-sm">
+            <div class="bg-[#fffdfa] p-8 md:p-12 rounded-lg shadow-2xl flex flex-col items-center justify-center japanese-border max-w-[90%] md:max-w-md relative overflow-hidden">
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#b71c1c 2px, transparent 2px); background-size: 20px 20px;"></div>
+                <h2 id="result-text" class="text-5xl md:text-7xl font-extrabold mb-6 tracking-widest z-10" style="text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;">当たり！</h2>
+                <div class="relative w-56 h-56 md:w-72 md:h-72 rounded-sm overflow-hidden shadow-inner bg-gray-100 flex items-center justify-center border-4 border-[#e0e0e0] z-10">
+                    <img id="result-image" src="" alt="景品画像" class="w-full h-full object-cover hidden">
+                    <div id="result-no-image" class="text-gray-400 font-bold hidden">画像なし</div>
+                </div>
+                <div class="mt-6 bg-[#b71c1c] text-white px-6 py-2 rounded-sm shadow-md z-10 border border-[#ffca28]">
+                    <p id="result-prize-name" class="text-2xl md:text-3xl font-bold text-center tracking-wide">...</p>
+                </div>
+                <!-- LINEシェアボタン -->
+                <button id="share-btn" class="mt-4 px-6 py-2 bg-[#06C755] text-white font-bold rounded-full shadow-md hover:bg-[#05b04b] transition-colors z-10 tracking-wide text-lg flex items-center gap-2">
+                    <span>LINEでシェア 📤</span>
+                </button>
+                <button id="close-popup-btn" class="mt-4 px-8 py-3 bg-[#ffca28] text-[#b71c1c] font-black rounded-full shadow-lg border-b-4 border-[#ffb300] hover:translate-y-1 hover:border-b-0 active:bg-yellow-400 transition-all z-10 tracking-widest text-xl">
+                    閉じる
+                </button>
+            </div>
+        </div>
+
+        <!-- SVG ガラポン本体 -->
+        <svg viewBox="0 0 800 600" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <radialGradient id="drumGrad" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#FF5252" />
+                    <stop offset="100%" stop-color="#B71C1C" />
+                </radialGradient>
+                <radialGradient id="ballGrad-white" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#FFFFFF" />
+                    <stop offset="100%" stop-color="#E0E0E0" />
+                </radialGradient>
+                <radialGradient id="ballGrad-blue" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#64B5F6" />
+                    <stop offset="100%" stop-color="#1976D2" />
+                </radialGradient>
+                <radialGradient id="ballGrad-yellow" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#FFF59D" />
+                    <stop offset="100%" stop-color="#FBC02D" />
+                </radialGradient>
+                <radialGradient id="ballGrad-red" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#EF5350" />
+                    <stop offset="100%" stop-color="#C62828" />
+                </radialGradient>
+                <radialGradient id="ballGrad-gold" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#FFF59D" />
+                    <stop offset="50%" stop-color="#FFD54F" />
+                    <stop offset="100%" stop-color="#F57F17" />
+                </radialGradient>
+            </defs>
+            <!-- 台座 -->
+            <rect x="150" y="480" width="500" height="40" rx="10" fill="#795548" />
+            <rect x="150" y="520" width="500" height="10" rx="5" fill="#4E342E" />
+            <!-- トレイ（樋） -->
+            <polygon points="450,420 450,450 200,480 200,450" fill="#90A4AE" />
+            <polygon points="450,440 450,455 200,485 200,470" fill="#78909C" />
+            <!-- 受け皿 -->
+            <rect x="180" y="450" width="100" height="40" rx="10" fill="#CFD8DC" />
+            <rect x="190" y="460" width="80" height="20" rx="5" fill="#B0BEC5" />
+            <!-- 脚（背面） -->
+            <path d="M 430,280 L 370,480 L 410,480 L 450,280 Z" fill="#5D4037" />
+            <path d="M 470,280 L 530,480 L 490,480 L 450,280 Z" fill="#5D4037" />
+            <!-- ドラム -->
+            <g id="drum-group" transform="translate(450,280)">
+                <polygon points="166.3,68.9 68.9,166.3 -68.9,166.3 -166.3,68.9 -166.3,-68.9 -68.9,-166.3 68.9,-166.3 166.3,-68.9" fill="url(#drumGrad)" stroke="#FFCA28" stroke-width="12" stroke-linejoin="round" />
+                <line x1="0" y1="0" x2="166.3" y2="68.9" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="68.9" y2="166.3" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="-68.9" y2="166.3" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="-166.3" y2="68.9" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="-166.3" y2="-68.9" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="-68.9" y2="-166.3" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="68.9" y2="-166.3" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <line x1="0" y1="0" x2="166.3" y2="-68.9" stroke="#FFCA28" stroke-width="6" stroke-linecap="round" />
+                <!-- 玉出口穴 -->
+                <circle cx="-130" cy="54" r="16" fill="#212121" />
+                <circle cx="-130" cy="54" r="16" fill="none" stroke="#FFCA28" stroke-width="4" />
+            </g>
+            <!-- 脚（前面） -->
+            <path d="M 420,280 L 340,490 L 390,490 L 450,280 Z" fill="#8D6E63" />
+            <path d="M 480,280 L 560,490 L 510,490 L 450,280 Z" fill="#8D6E63" />
+            <polygon points="380,410 520,410 510,440 390,440" fill="#6D4C41" />
+            <!-- ボールコンテナ -->
+            <g id="ball-container"></g>
+            <!-- 軸受け -->
+            <circle cx="450" cy="280" r="30" fill="#CFD8DC" stroke="#90A4AE" stroke-width="4" />
+            <circle cx="450" cy="280" r="15" fill="#78909C" />
+            <!-- ハンドル -->
+            <g id="handle-group" transform="translate(450,280)">
+                <rect x="-10" y="-10" width="130" height="20" rx="10" fill="#ECEFF1" stroke="#B0BEC5" stroke-width="3" />
+                <rect x="100" y="-20" width="30" height="40" rx="15" fill="#5D4037" stroke="#3E2723" stroke-width="2" />
+                <circle cx="0" cy="0" r="8" fill="#546E7A" />
+            </g>
+            <!-- ドラッグ操作用の透明ヒットエリア -->
+            <circle cx="450" cy="280" r="220" fill="transparent" id="hit-area" class="hit-area" />
+        </svg>
+    </div>
+
+    <!-- ===== ボタン ===== -->
+    <button id="spin-btn" class="mt-8 relative group z-10">
+        <div class="absolute inset-0 bg-[#ffca28] rounded-lg translate-y-2 group-hover:translate-y-1 group-active:translate-y-0 transition-transform"></div>
+        <div class="relative bg-[#b71c1c] text-white px-10 py-4 text-2xl md:text-3xl rounded-lg font-bold border-2 border-[#ffca28] tracking-widest flex items-center justify-center group-hover:-translate-y-1 group-active:translate-y-0 transition-transform">
+            <span style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">自動で回す</span>
+        </div>
+    </button>
+
+    <!-- ステータスメッセージ -->
+    <p id="status-message" class="mt-3 text-sm text-[#8D6E63] z-10"></p>
+
+    <!-- ===== エラートースト ===== -->
+    <div id="error-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-[200%] bg-white border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3 shadow-lg z-[200] transition-transform duration-500 max-w-[calc(100vw-32px)]" hidden>
+        <p id="error-message" class="text-sm text-red-700 flex-1">通信エラーが発生しました</p>
+        <button id="error-retry" class="bg-[#b71c1c] text-white px-3 py-1 rounded text-xs font-bold whitespace-nowrap">再試行</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

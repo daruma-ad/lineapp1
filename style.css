@@ -1,0 +1,8 @@
+/* だるまや大抽選会 — style.css
+   Tailwind CDN がメインのスタイリングを担当。
+   このファイルは追加のカスタムスタイルのみ。 */
+
+/* エラートースト表示アニメーション */
+#error-toast.visible {
+    transform: translateX(-50%) translateY(0) !important;
+}
