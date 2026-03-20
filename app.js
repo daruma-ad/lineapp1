@@ -171,7 +171,11 @@
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
+            console.log('Lottery API Response:', data);
             return BALLS.find((b) => b.key === data.prize) || BALLS[0];
+        } catch (error) {
+            console.error('Lottery API Error:', error);
+            throw error;
         } finally {
             clearTimeout(timeout);
         }
@@ -248,7 +252,17 @@
             return;
         }
 
-        const ballData = await callLotteryAPI(state.userProfile?.userId || 'guest');
+        let ballData;
+        try {
+            ballData = await callLotteryAPI(state.userProfile?.userId || 'guest');
+        } catch (e) {
+            console.error('Failed to get lottery result:', e);
+            showError('通信エラーが発生しました。時間を置いてやり直してください。', () => {
+                location.reload();
+            });
+            state.isSpinLocked = false;
+            return;
+        }
 
         // SVG玉を作成
         const ballContainer = $('ball-container');
