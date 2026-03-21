@@ -7,10 +7,11 @@ const db = admin.firestore();
 
 // 抽選設定 (確率は合計 1.0 になるように調整)
 const PRIZES = [
-  { key: 'first',  name: '1等：特製だるま', prob: 0.01 },
-  { key: 'second', name: '2等：和装小物500円引券', prob: 0.05 },
-  { key: 'third',  name: '3等：次回100円引券', prob: 0.15 },
-  { key: 'lose',   name: '残念', prob: 0.79 },
+  { key: 'special', name: '特選！！', prob: 0.02 },
+  { key: 'first',   name: '1等：特製だるま', prob: 0.05 },
+  { key: 'second',  name: '2等：和装小物500円引券', prob: 0.10 },
+  { key: 'third',   name: '3等：次回100円引券', prob: 0.20 },
+  { key: 'lose',    name: '残念', prob: 0.63 },
 ];
 
 /**
@@ -46,8 +47,31 @@ exports.lottery = onRequest({ cors: true }, async (req, res) => {
       const userRef = db.collection("users").doc(userId);
       const userDoc = await t.get(userRef);
       
-      // デフォルト3回（必要に応じて調整）
-      let attempts = userDoc.exists ? userDoc.data().remainingAttempts : 3;
+      let attempts = 3;
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        if (data.lastDraw) {
+            // 日本時間での日付またぎ判定
+            const lastDate = data.lastDraw.toDate();
+            const now = new Date();
+            const jstOffset = 9 * 60 * 60 * 1000;
+            const lastJst = new Date(lastDate.getTime() + jstOffset);
+            const nowJst = new Date(now.getTime() + jstOffset);
+            
+            const isSameDay = 
+               lastJst.getUTCFullYear() === nowJst.getUTCFullYear() &&
+               lastJst.getUTCMonth() === nowJst.getUTCMonth() &&
+               lastJst.getUTCDate() === nowJst.getUTCDate();
+               
+            if (isSameDay) {
+                attempts = data.remainingAttempts;
+            } else {
+                attempts = 3; // 日付が変わっていればリセット
+            }
+        } else {
+            attempts = data.remainingAttempts || 3;
+        }
+      }
 
       if (attempts <= 0) {
         throw new Error("No attempts left");
@@ -65,8 +89,13 @@ exports.lottery = onRequest({ cors: true }, async (req, res) => {
         }
       }
 
+      const displayName = req.body.displayName || '不明なユーザー';
+      const pictureUrl = req.body.pictureUrl || '';
+
       // 4. 残り回数と履歴の更新
       t.set(userRef, { 
+        displayName,
+        pictureUrl,
         remainingAttempts: attempts - 1,
         lastDraw: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
@@ -76,6 +105,8 @@ exports.lottery = onRequest({ cors: true }, async (req, res) => {
       const historyRef = db.collection("history").doc();
       t.set(historyRef, { 
         userId, 
+        displayName,
+        pictureUrl,
         prize: selectedPrize, 
         timestamp: admin.firestore.FieldValue.serverTimestamp() 
       });

@@ -166,7 +166,11 @@
                     'Content-Type': 'application/json',
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify({ 
+                    userId,
+                    displayName: state.userProfile?.displayName || '不明',
+                    pictureUrl: state.userProfile?.pictureUrl || ''
+                }),
                 signal: controller.signal,
             });
             if (!res.ok) {
@@ -252,7 +256,8 @@
         console.log('--- dropBall start ---');
         // 残回数チェック
         if (state.remainingAttempts <= 0) {
-            showStatus('本日の抽選回数は終了しました');
+            showStatus('本日の抽選回数は終了しました。また明日挑戦してください！');
+            alert('本日の抽選回数は終了しました。\nまた明日（深夜0時リセット）の挑戦をお待ちしております！');
             return;
         }
 
@@ -461,10 +466,27 @@
     // UI更新
     // ============================================
     function updateRemainingUI() {
-        $('remaining-count').textContent = state.remainingAttempts;
+        const btnText = $('spin-btn').querySelector('span');
+        const badge = $('remaining-badge');
+
         if (state.remainingAttempts <= 0) {
             $('spin-btn').classList.add('opacity-50', 'pointer-events-none');
-            showStatus('本日の抽選回数は終了しました。また明日！');
+            showStatus('本日の抽選回数は終了しました。また明日お越しください！');
+            if (btnText) btnText.textContent = '本日分終了';
+            if (badge) {
+                badge.innerHTML = '本日は終了しました';
+                badge.classList.remove('bg-[#b71c1c]');
+                badge.classList.add('bg-gray-700');
+            }
+        } else {
+            $('spin-btn').classList.remove('opacity-50', 'pointer-events-none');
+            showStatus('');
+            if (btnText) btnText.textContent = '自動で回す';
+            if (badge) {
+                badge.innerHTML = `残り <span id="remaining-count" class="text-[#ffca28] text-base font-black">${state.remainingAttempts}</span> 回`;
+                badge.classList.add('bg-[#b71c1c]');
+                badge.classList.remove('bg-gray-700');
+            }
         }
     }
 
