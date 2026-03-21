@@ -169,7 +169,10 @@
                 body: JSON.stringify({ userId }),
                 signal: controller.signal,
             });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`HTTP ${res.status}: ${text}`);
+            }
             const data = await res.json();
             console.log('Lottery API Response:', data);
             return BALLS.find((b) => b.key === data.prize) || BALLS[0];
@@ -266,9 +269,8 @@
             console.log('Lottery API Result:', ballData);
         } catch (e) {
             console.error('Failed to get lottery result:', e);
-            showError('通信エラーが発生しました。時間を置いてやり直してください。', () => {
-                location.reload();
-            });
+            alert(`【原因調査用エラー表示】\n${e.message}\n\n※この画面のスクリーンショットをお願いします`);
+            showStatus('エラーが発生しました');
             state.isSpinLocked = false;
             // エラー時はスピンボタンを元に戻す
             if (state.remainingAttempts > 0) {
