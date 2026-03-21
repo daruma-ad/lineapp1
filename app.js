@@ -246,21 +246,34 @@
     // 玉の排出アニメーション
     // ============================================
     async function dropBall() {
+        console.log('--- dropBall start ---');
         // 残回数チェック
         if (state.remainingAttempts <= 0) {
             showStatus('本日の抽選回数は終了しました');
             return;
         }
 
+        // 即座にロックをかけ、UIを更新
+        state.isSpinLocked = true;
+        state.isDragging = false;
+        $('spin-btn').classList.add('opacity-50', 'pointer-events-none');
+        showStatus('抽選中...');
+
         let ballData;
         try {
+            console.log('Calling Lottery API...');
             ballData = await callLotteryAPI(state.userProfile?.userId || 'guest');
+            console.log('Lottery API Result:', ballData);
         } catch (e) {
             console.error('Failed to get lottery result:', e);
             showError('通信エラーが発生しました。時間を置いてやり直してください。', () => {
                 location.reload();
             });
             state.isSpinLocked = false;
+            // エラー時はスピンボタンを元に戻す
+            if (state.remainingAttempts > 0) {
+                $('spin-btn').classList.remove('opacity-50', 'pointer-events-none');
+            }
             return;
         }
 
@@ -272,10 +285,6 @@
         ball.setAttribute('stroke', ballData.stroke);
         ball.setAttribute('stroke-width', '2');
         ballContainer.appendChild(ball);
-
-        state.isSpinLocked = true;
-        state.isDragging = false;
-        $('spin-btn').classList.add('opacity-50', 'pointer-events-none');
 
         // アニメーション: 出口 → 樋を転がる → 受け皿
         const startX = 450, startY = 420;
