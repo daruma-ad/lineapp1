@@ -23,11 +23,8 @@
     // 賞品定義（確率はモックAPI用。本番ではサーバー側で決定）
     // ============================================
     const BALLS = [
-        { fill: 'url(#ballGrad-white)',  stroke: '#BDBDBD', prob: 0.70, text: '参加賞',    textColor: '#757575', rank: 4, prizeName: '来店ぽいんと10pt',     image: 'https://placehold.co/400x400/eeeeee/999999?text=10pt',    key: 'lose' },
-        { fill: 'url(#ballGrad-blue)',   stroke: '#1976D2', prob: 0.15, text: '3等',       textColor: '#2196F3', rank: 3, prizeName: '和装小物500円引券',     image: 'https://placehold.co/400x400/bbdefb/1976d2?text=Coupon',  key: 'third' },
-        { fill: 'url(#ballGrad-yellow)', stroke: '#FBC02D', prob: 0.08, text: '2等',       textColor: '#FFCA28', rank: 2, prizeName: '髪飾りプレゼント',     image: 'https://placehold.co/400x400/fff9c4/fbc02d?text=Gift',   key: 'second' },
-        { fill: 'url(#ballGrad-red)',    stroke: '#D32F2F', prob: 0.06, text: '1等！',     textColor: '#F44336', rank: 1, prizeName: '浴衣1着プレゼント',     image: 'https://placehold.co/400x400/ffcdd2/d32f2f?text=Yukata', key: 'first' },
-        { fill: 'url(#ballGrad-gold)',   stroke: '#FFA000', prob: 0.01, text: '特賞！！',   textColor: '#FFD700', rank: 0, prizeName: '振袖レンタル20%OFF',   image: 'https://placehold.co/400x400/ffecb3/ffa000?text=20%25OFF', key: 'special' },
+        { fill: 'url(#ballGrad-red)',    stroke: '#D32F2F', prob: 0.10, text: '大当り！',   textColor: '#F44336', rank: 1, prizeName: '1万円割引（3万円以上のお買上に使用可）', image: 'https://placehold.co/400x400/ffcdd2/d32f2f?text=10000Yen', key: 'first' },
+        { fill: 'url(#ballGrad-white)',  stroke: '#BDBDBD', prob: 0.90, text: '参加賞',    textColor: '#757575', rank: 4, prizeName: '来店ポイント10pt',     image: 'https://placehold.co/400x400/eeeeee/999999?text=10pt',    key: 'lose' },
     ];
 
     // ============================================

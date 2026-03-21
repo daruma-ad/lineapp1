@@ -7,11 +7,8 @@ const db = admin.firestore();
 
 // 抽選設定 (確率は合計 1.0 になるように調整)
 const PRIZES = [
-  { key: 'special', name: '特選！！', prob: 0.02 },
-  { key: 'first',   name: '1等：特製だるま', prob: 0.05 },
-  { key: 'second',  name: '2等：和装小物500円引券', prob: 0.10 },
-  { key: 'third',   name: '3等：次回100円引券', prob: 0.20 },
-  { key: 'lose',    name: '残念', prob: 0.63 },
+  { key: 'first', name: '大当り：1万円割引', prob: 0.10 },
+  { key: 'lose',  name: '参加賞', prob: 0.90 },
 ];
 
 /**
@@ -26,21 +23,28 @@ exports.lottery = onRequest({ cors: true }, async (req, res) => {
   }
 
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Unauthorized" });
+  let idToken = null;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    idToken = authHeader.split("Bearer ")[1];
   }
-  
-  const idToken = authHeader.split("Bearer ")[1];
 
   try {
-    // 1. LINE IDトークンの検証
-    const verifyRes = await axios.post("https://api.line.me/oauth2/v2.1/verify", 
-      new URLSearchParams({
-        id_token: idToken,
-        client_id: "2009548533" // ← LINEログインのチャネルID（LIFF IDの前の部分）
-      })
-    );
-    const userId = verifyRes.data.sub;
+    let userId = req.body.userId || 'guest';
+
+    // 1. LINE IDトークンの検証 (トークンがあれば優先)
+    if (idToken && idToken !== 'null') {
+        try {
+            const verifyRes = await axios.post("https://api.line.me/oauth2/v2.1/verify", 
+              new URLSearchParams({
+                id_token: idToken,
+                client_id: "2009548533" 
+              })
+            );
+            userId = verifyRes.data.sub;
+        } catch (verifyError) {
+            console.warn('Token verify failed, falling back to body userId:', verifyError.message);
+        }
+    }
 
     // 2. Firestore トランザクションで不整合を防ぎつつ回数チェックと更新
     const result = await db.runTransaction(async (t) => {
