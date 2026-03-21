@@ -540,6 +540,37 @@
     }
 
     // ============================================
+    // お店へ結果送信 (claimPrize)
+    // ============================================
+    async function claimPrize() {
+        const resultText = $('result-text').textContent;
+        const prizeName = $('result-prize-name').textContent;
+
+        if (state.liffReady && typeof liff !== 'undefined') {
+            try {
+                // トークルームにメッセージを送信するAPI
+                await liff.sendMessages([{
+                    type: 'text',
+                    text: `【ガラポン大抽選会】\n${resultText}！\n「${prizeName}」が当たりました！🎉\n\nこちらの画面をスタッフに確認させてください。`
+                }]);
+                alert('お店のトークルームに結果を送信しました！\n左上の「×」でガラポンを閉じて、トーク画面をスタッフにお見せください。');
+            } catch (error) {
+                console.error('Send message failed:', error);
+                if (error.code === 'USER_AGREEMENT_ERROR') {
+                    alert('メッセージ送信の権限が許可されていませんでした。画面をこのままスタッフにお見せください。');
+                } else if (!liff.getContext() || !['utou', 'room', 'group', 'square_chat'].includes(liff.getContext().type)) {
+                    // トークルーム以外（外部ブラウザやKeepなど）から開かれた場合
+                    alert('この機能はお店のトーク画面から開いた場合のみ利用できます。\n画面をこのままスタッフにお見せください。');
+                } else {
+                    alert('送信に失敗しました。画面をこのままスタッフにお見せください。');
+                }
+            }
+        } else {
+            alert('この機能はLINEアプリ内でのみ利用できます。\n画面をこのままスタッフにお見せください。');
+        }
+    }
+
+    // ============================================
     // LIFF初期化
     // ============================================
     async function initLIFF() {
@@ -598,6 +629,10 @@
 
         // シェアボタン
         $('share-btn').addEventListener('click', shareResult);
+
+        // お店に送信ボタン
+        const claimBtn = $('claim-btn');
+        if (claimBtn) claimBtn.addEventListener('click', claimPrize);
 
         showStatus('ハンドルをドラッグ、または「自動で回す」ボタンで抽選！');
     }
