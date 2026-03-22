@@ -23,8 +23,8 @@
     // 賞品定義（確率はモックAPI用。本番ではサーバー側で決定）
     // ============================================
     const BALLS = [
-        { fill: 'url(#ballGrad-red)',    stroke: '#D32F2F', prob: 0.10, text: '大当り！',   textColor: '#F44336', rank: 1, prizeName: '1万円割引（3万円以上のお買上に使用可）', image: './images/win.jpg', key: 'first' },
-        { fill: 'url(#ballGrad-white)',  stroke: '#BDBDBD', prob: 0.90, text: '参加賞',    textColor: '#757575', rank: 4, prizeName: '来店ポイント10pt',     image: './images/lose.jpg',    key: 'lose' },
+        { fill: 'url(#ballGrad-red)',    stroke: '#D32F2F', prob: 0.10, text: '大当り！',   textColor: '#F44336', rank: 1, prizeName: '1万円割引（3万円以上のお買上に使用可）', image: 'https://daruma-ad.github.io/lineapp1/images/win.jpg', key: 'first' },
+        { fill: 'url(#ballGrad-white)',  stroke: '#BDBDBD', prob: 0.90, text: '参加賞',    textColor: '#757575', rank: 4, prizeName: '来店ポイント10pt',     image: 'https://daruma-ad.github.io/lineapp1/images/lose.jpg',    key: 'lose' },
     ];
 
     // ============================================
